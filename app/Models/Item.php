@@ -28,14 +28,23 @@ class Item extends Model
         return $this->hasMany(Borrow::class, 'item_id', 'Itemid');
     }
 
+    // public function getDisplayNameAttribute(): string
+    // {
+    //     $locale = app()->getLocale();
+
+    //     if ($locale === 'kh' && !empty($this->name_kh)) {
+    //         return $this->name_kh;
+    //     }
+
+    //     return $this->name ?? $this->name_kh ?? '';
+    // }
+
     public function getDisplayNameAttribute(): string
-    {
-        $locale = app()->getLocale();
-
-        if ($locale === 'kh' && !empty($this->name_kh)) {
-            return $this->name_kh;
-        }
-
-        return $this->name ?? $this->name_kh ?? '';
+{
+    if (!empty($this->name_kh)) {
+        return $this->name . ' (' . $this->name_kh . ')';
     }
+
+    return $this->name ?? '';
+}
 }

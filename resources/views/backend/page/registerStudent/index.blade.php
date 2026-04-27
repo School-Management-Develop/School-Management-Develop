@@ -179,9 +179,10 @@
         }
 
         .ts-wrapper.single .ts-control {
-            border: 1px solid green;
-            height: 42px;
-            border-radius: 10px;
+            border: 1px solid green !important;
+            height: 42px !important;
+            border-radius: 10px !important;
+            padding-top: 6px !important;
         }
         .gray{
             opacity: 0.6;
@@ -380,9 +381,9 @@
                     </div>
 
                     <!-- NOTES -->
-                    <div class="mb-3">
+                    <div class="mb-3 d-none" id="notes_wrapper">
                         <label class="form-label">{{ __('app.notes') }} ({{__('app.Optional')}})</label>
-                        <textarea name="notes" class="form-control" style="resize: none;"></textarea>
+                        <textarea name="notes" id="notes" class="form-control" style="resize: none;"></textarea>
                     </div>
 
                     <div class="policy" style="margin-bottom: 2px">
@@ -430,6 +431,8 @@
             const form = document.getElementById('registerForm');
             const submitBtn = document.getElementById('submitBtn');
             const icon = document.getElementById('icon');
+            const notesWrapper = document.getElementById('notes_wrapper');
+            const notesField = document.getElementById('notes');
 
             function setQtyOptions(isSocket) {
                 qtySelect.innerHTML = '';
@@ -472,6 +475,15 @@
 
                 const isSocket = lowerName.includes('socket') || lowerName.includes('ព្រី');
                 setQtyOptions(isSocket);
+
+                // Show notes field only when "other" is selected
+                const isOther = lowerName.includes('other') || lowerName.includes('ផ្សេងៗ');
+                if (isOther) {
+                    notesWrapper.classList.remove('d-none');
+                } else {
+                    notesWrapper.classList.add('d-none');
+                    notesField.value = '';
+                }
             }
 
             new TomSelect('#item_id', {
