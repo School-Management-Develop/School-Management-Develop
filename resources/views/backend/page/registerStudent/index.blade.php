@@ -382,7 +382,7 @@
 
                     <!-- NOTES -->
                     <div class="mb-3 d-none" id="notes_wrapper">
-                        <label class="form-label">{{ __('app.notes') }} ({{__('app.Optional')}})</label>
+                        <label class="form-label">{{ __('app.notes') }}</label>
                         <textarea name="notes" id="notes" class="form-control" style="resize: none;"></textarea>
                     </div>
 
@@ -477,7 +477,7 @@
                 setQtyOptions(isSocket);
 
                 // Show notes field only when "other" is selected
-                const isOther = lowerName.includes('other') || lowerName.includes('ផ្សេងៗ');
+                const isOther = !lowerName.includes('socket') ;
                 if (isOther) {
                     notesWrapper.classList.remove('d-none');
                 } else {

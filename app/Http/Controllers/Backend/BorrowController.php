@@ -56,6 +56,7 @@ class BorrowController extends Controller
         if ($filter == 'status' && $request->filled('status')) {
             $query->where('status', $request->status);
         }
+
         $activeBorrows = Borrow::with([
             'student',
             'item',
@@ -69,13 +70,13 @@ class BorrowController extends Controller
         $borrows = $query->orderByDesc('id')->paginate(20)->withQueryString();
 
         $stats = [
-            'total_records' => Borrow::count(),
-            'active_records' => Borrow::where('status', 'BORROWED')->count(),
+            'total_records'   => Borrow::count(),
+            'active_records'  => Borrow::where('status', 'BORROWED')->count(),
             'overdue_records' => Borrow::where('status', 'OVERDUE')->count(),
-            'returned_records' => Borrow::where('status', 'RETURNED')->count(),
-            'total_qty' => Borrow::sum('qty'),
-            'borrowed_qty' => Borrow::where('status', 'BORROWED')->sum('qty'),
-            'returned_qty' => Borrow::where('status', 'RETURNED')->sum('qty'),
+            'returned_records'=> Borrow::where('status', 'RETURNED')->count(),
+            'total_qty'       => Borrow::sum('qty'),
+            'borrowed_qty'    => Borrow::where('status', 'BORROWED')->sum('qty'),
+            'returned_qty'    => Borrow::where('status', 'RETURNED')->sum('qty'),
         ];
 
         return view('backend.page.borrows.index', compact(
@@ -92,10 +93,10 @@ class BorrowController extends Controller
     {
         $data = $request->validate([
             'student_id' => ['required', 'exists:students,student_id'],
-            'item_id' => ['required'],
-            'qty' => ['required', 'integer', 'min:1'],
-            'due_date' => ['nullable', 'date', 'after_or_equal:today'],
-            'notes' => ['nullable', 'string', 'max:1000'],
+            'item_id'    => ['required'],
+            'qty'        => ['required', 'integer', 'min:1'],
+            'due_date'   => ['nullable', 'date', 'after_or_equal:today'],
+            'notes'      => ['nullable', 'string', 'max:1000'],
         ]);
 
         if ($data['item_id'] === 'other') {
@@ -134,27 +135,27 @@ class BorrowController extends Controller
         }
 
         $borrow = Borrow::create([
-            'student_id' => $data['student_id'],
-            'item_id' => $data['item_id'],
-            'qty' => $data['qty'],
+            'student_id'  => $data['student_id'],
+            'item_id'     => $data['item_id'],
+            'qty'         => $data['qty'],
             'borrow_date' => now('Asia/Jakarta'),
-            'due_date' => $data['due_date'] ?? null,
-            'status' => 'BORROWED',
-            'notes' => $data['notes'] ?? null,
+            'due_date'    => $data['due_date'] ?? null,
+            'status'      => 'BORROWED',
+            'notes'       => $data['notes'] ?? null,
             'approved_by' => Auth::id(),
         ]);
 
         $student = Student::where('student_id', $data['student_id'])->first();
 
         ItemHistory::create([
-            'item_id' => $item->Itemid,
-            'borrow_id' => $borrow->id,
-            'student_id' => $student?->student_id,
-            'action' => 'Borrowed',
-            'details' => (Auth::user()?->name ?? 'System') . ' borrowed ' . $borrow->qty . ' x ' . ($item->name ?? '-') . ' for ' . ($student->student_name ?? '-') . '.',
-            'user_id' => Auth::id(),
+            'item_id'     => $item->Itemid,
+            'borrow_id'   => $borrow->id,
+            'student_id'  => $student?->student_id,
+            'action'      => 'Borrowed',
+            'details'     => (Auth::user()?->name ?? 'System') . ' borrowed ' . $borrow->qty . ' x ' . ($item->name ?? '-') . ' for ' . ($student->student_name ?? '-') . '.',
+            'user_id'     => Auth::id(),
             'approved_by' => Auth::id(),
-            'action_at' => now('Asia/Jakarta'),
+            'action_at'   => now('Asia/Jakarta'),
         ]);
 
         return redirect()->back()->with('success', 'Borrow created successfully.');
@@ -163,15 +164,15 @@ class BorrowController extends Controller
     public function storeReturn(Request $request)
     {
         $data = $request->validate([
-            'borrow_id' => [
+            'borrow_id'    => [
                 'required',
                 'exists:borrows,id',
                 Rule::exists('borrows', 'id')->where(function ($q) {
                     $q->whereIn('status', ['BORROWED', 'OVERDUE']);
                 }),
             ],
-            'return_date' => ['required', 'date_format:Y-m-d\TH:i'],
-            'condition' => ['required', 'string', 'max:50'],
+            'return_date'  => ['required', 'date_format:Y-m-d\TH:i'],
+            'condition'    => ['required', 'string', 'max:50'],
             'return_notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
@@ -183,46 +184,30 @@ class BorrowController extends Controller
         $returnDate = Carbon::createFromFormat('Y-m-d\TH:i', $data['return_date'], 'Asia/Jakarta');
 
         $borrow->update([
-            'return_date' => $returnDate,
-            'condition' => $data['condition'],
+            'return_date'  => $returnDate,
+            'condition'    => $data['condition'],
             'return_notes' => $data['return_notes'] ?? null,
-            'status' => 'RETURNED',
-            'returned_by' => Auth::id(),
+            'status'       => 'RETURNED',
+            'returned_by'  => Auth::id(),
         ]);
 
         ItemHistory::create([
-            'borrow_id' => $borrow->id,
-            'student_id' => $borrow->student_id,
-            'item_id' => $borrow->item_id,
-            'user_id' => Auth::id(),
+            'borrow_id'   => $borrow->id,
+            'student_id'  => $borrow->student_id,
+            'item_id'     => $borrow->item_id,
+            'user_id'     => Auth::id(),
             'approved_by' => $borrow->approved_by,
             'returned_by' => $borrow->returned_by,
-            'action' => 'Returned',
-            'details' => (Auth::user()?->name ?? 'System') . ' returned ' . $borrow->qty . ' x ' . ($borrow->item->display_name ?? '-') . ' from ' . ($borrow->student->student_name ?? '-') . '.',
-            'action_at' => $returnDate,
+            'action'      => 'Returned',
+            'details'     => (Auth::user()?->name ?? 'System') . ' returned ' . $borrow->qty . ' x ' . ($borrow->item->display_name ?? '-') . ' from ' . ($borrow->student->student_name ?? '-') . '.',
+            'action_at'   => $returnDate,
         ]);
+
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
                 'message' => 'Return saved successfully.',
-                'borrow' => [
-                    'id' => $borrow->id,
-                    'student_name' => $borrow->student->student_name ?? 'N/A',
-                    'gender' => $borrow->student->gender ?? 'N/A',
-                    'group_name' => $borrow->student->group->group_name ?? 'N/A',
-                    'item_name' => $borrow->item->display_name ?? 'N/A',
-                    'qty' => $borrow->qty,
-                    'borrow_date' => $borrow->borrow_date ? Carbon::parse($borrow->borrow_date)->format('d M Y H:i') : '-',
-                    'return_date' => $borrow->return_date ? Carbon::parse($borrow->return_date)->format('d M Y H:i') : '-',
-                    'status' => $borrow->status,
-                    'condition' => $borrow->condition ?? '-',
-                    'notes' => $borrow->notes ?? '-',
-                    'return_notes' => $borrow->return_notes ?? '-',
-                    'approved_by' => $borrow->approvedByUser->name ?? '-',
-                    'returned_by' => $borrow->returnedByUser->name ?? '-',
-                    'student_id' => $borrow->student_id,
-                    'item_id' => $borrow->item_id,
-                ]
+                'borrow'  => $this->borrowData($borrow),
             ]);
         }
 
@@ -232,140 +217,179 @@ class BorrowController extends Controller
     public function undoReturn(Request $request, Borrow $borrow)
     {
         if ($borrow->status !== 'RETURNED') {
-            return back()->withErrors([
-                'status' => 'Only RETURNED records can be undone.',
-            ]);
+            return back()->withErrors(['status' => 'Only RETURNED records can be undone.']);
         }
 
         $borrow->load(['student', 'item']);
 
-        $item = Item::where('Itemid', $borrow->item_id)->firstOrFail();
+        // Check availability dynamically before undoing
+        $activeBorrowed = Borrow::where('item_id', $borrow->item_id)
+            ->whereIn('status', ['BORROWED', 'OVERDUE'])
+            ->sum('qty');
+        $available = ($borrow->item->qty ?? 0) - $activeBorrowed;
 
-        if (($item->qty ?? 0) < ($borrow->qty ?? 1)) {
+        if ($available < ($borrow->qty ?? 1)) {
             return back()->withErrors([
-                'qty' => "Cannot undo return. Item stock is too low now (Available: {$item->qty}).",
+                'qty' => "Cannot undo return. Not enough stock available ({$available}).",
             ]);
         }
 
         $oldReturnedBy = $borrow->returned_by;
 
-        $item->decrement('qty', $borrow->qty ?? 1);
-
         $borrow->update([
-            'status' => 'BORROWED',
-            'return_date' => null,
-            'condition' => null,
+            'status'       => 'BORROWED',
+            'return_date'  => null,
+            'condition'    => null,
             'return_notes' => null,
-            'returned_by' => null,
+            'returned_by'  => null,
         ]);
 
         ItemHistory::create([
-            'borrow_id' => $borrow->id,
-            'student_id' => $borrow->student_id,
-            'item_id' => $borrow->item_id,
-            'user_id' => Auth::id(),
+            'borrow_id'   => $borrow->id,
+            'student_id'  => $borrow->student_id,
+            'item_id'     => $borrow->item_id,
+            'user_id'     => Auth::id(),
             'approved_by' => $borrow->approved_by,
             'returned_by' => $oldReturnedBy,
-            'action' => 'Undo return',
-            'details' => (Auth::user()?->name ?? 'System') . ' undid the return for ' . $borrow->qty . ' x ' . ($borrow->item->display_name ?? '-') . ' from ' . ($borrow->student->student_name ?? '-') . '.',
-            'action_at' => now('Asia/Jakarta'),
+            'action'      => 'Undo return',
+            'details'     => (Auth::user()?->name ?? 'System') . ' undid the return for ' . $borrow->qty . ' x ' . ($borrow->item->display_name ?? '-') . ' from ' . ($borrow->student->student_name ?? '-') . '.',
+            'action_at'   => now('Asia/Jakarta'),
         ]);
-         if ($request->ajax()) {
-        return response()->json([
-            'success' => true,
-            'message' => 'Undo return successful.',
-            'borrow' => [
-                'id' => $borrow->id,
-                'student_name' => $borrow->student->student_name ?? 'N/A',
-                'gender' => $borrow->student->gender ?? 'N/A',
-                'group_name' => $borrow->student->group->group_name ?? 'N/A',
-                'item_name' => $borrow->item->display_name ?? 'N/A',
-                'qty' => $borrow->qty,
-                'borrow_date' => $borrow->borrow_date ? Carbon::parse($borrow->borrow_date)->format('d M Y H:i') : '-',
-                'return_date' => '-',
-                'status' => $borrow->status,
-                'condition' => '-',
-                'notes' => $borrow->notes ?? '-',
-                'return_notes' => '-',
-                'approved_by' => $borrow->approvedByUser->name ?? '-',
-                'returned_by' => '-',
-                'student_id' => $borrow->student_id,
-                'item_id' => $borrow->item_id,
-            ]
-        ]);
-    }
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Undo return successful.',
+                'borrow'  => $this->borrowData($borrow, returnDate: '-', condition: '-', returnNotes: '-', returnedBy: '-'),
+            ]);
+        }
+
         return redirect()->route('borrows.index')->with('success', 'Return undone. Status is BORROWED again.');
     }
 
     public function destroy(Borrow $borrow)
-{
-    // Return qty to stock if still borrowed
-    if ($borrow->status === 'BORROWED') {
-        Item::where('Itemid', $borrow->item_id)->increment('available', $borrow->qty ?? 1);
+    {
+        $borrow->deleted_by = Auth::id();
+        $borrow->save();
+        $borrow->delete(); // soft delete — sets deleted_at
+
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Borrow record moved to trash.',
+                'id'      => $borrow->id,
+            ]);
+        }
+
+        return redirect()->route('borrows.index')
+            ->with('success', 'Borrow record moved to trash.');
     }
- 
-    $borrow->deleted_by = Auth::id();
-    $borrow->save();
-    $borrow->delete(); // soft delete — sets deleted_at
- 
-    if (request()->ajax()) {
+
+    public function trashed(Request $request)
+    {
+        $q = $request->input('q');
+
+        $trashed = Borrow::onlyTrashed()
+            ->with(['student.group', 'item', 'deletedByUser'])
+            ->when($q, function ($query) use ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->whereHas('student', fn($s) => $s->where('student_name', 'like', "%{$q}%"))
+                        ->orWhereHas('item',    fn($i) => $i->where('name',         'like', "%{$q}%"));
+                });
+            })
+            ->latest('deleted_at')
+            ->paginate(15);
+
         return response()->json([
-            'success' => true,
-            'message' => 'Borrow record moved to trash.',
-            'id'      => $borrow->id,
+            'html'  => view('backend.page.borrows.trashed-rows', compact('trashed'))->render(),
+            'total' => $trashed->total(),
         ]);
     }
- 
-    return redirect()->route('borrows.index')
-        ->with('success', 'Borrow record moved to trash.');
-}
- 
-// ── 2. trashed() ────────────────────────────────────────────
-public function trashed(Request $request)
-{
-    $q = $request->input('q');
- 
-    $trashed = Borrow::onlyTrashed()
-        ->with(['student.group', 'item', 'deletedByUser'])
-        ->when($q, function ($query) use ($q) {
-            $query->where(function ($sub) use ($q) {
-                $sub->whereHas('student', fn($s) => $s->where('student_name', 'like', "%{$q}%"))
-                    ->orWhereHas('item',    fn($i) => $i->where('name',         'like', "%{$q}%"));
-            });
-        })
-        ->latest('deleted_at')
-        ->paginate(15);
- 
-    return response()->json([
-        'html'  => view('backend.page.borrows.trashed-rows', compact('trashed'))->render(),
-        'total' => $trashed->total(),
-    ]);
-}
- 
-// ── 3. restore() ────────────────────────────────────────────
-public function restore(int $id)
-{
-    $borrow = Borrow::onlyTrashed()->findOrFail($id);
- 
-    // Deduct stock back if it was borrowed when deleted
-    if ($borrow->status === 'BORROWED') {
-        Item::where('Itemid', $borrow->item_id)->decrement('available', $borrow->qty ?? 1);
+
+    public function restore(int $id)
+    {
+        $borrow = Borrow::onlyTrashed()->findOrFail($id);
+
+        $borrow->deleted_by = null;
+        $borrow->restore(); // clears deleted_at
+
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Borrow record restored successfully.',
+                'id'      => $borrow->id,
+            ]);
+        }
+
+        return redirect()->route('borrows.index')
+            ->with('success', 'Borrow record restored successfully.');
     }
- 
-    $borrow->deleted_by = null;
-    $borrow->restore(); // clears deleted_at
- 
-    if (request()->ajax()) {
-        return response()->json([
-            'success' => true,
-            'message' => 'Borrow record restored successfully.',
-            'id'      => $borrow->id,
+
+    public function update(Request $request)
+    {
+        $borrow = Borrow::findOrFail($request->borrow_id);
+
+        if ($borrow->status === 'RETURNED') {
+            return back()->withErrors(['error' => 'Cannot edit a returned borrow record.']);
+        }
+
+        $newItem = Item::findOrFail($request->item_id);
+        $newQty  = (int) $request->qty;
+
+        // Calculate availability dynamically, excluding the current borrow
+        // so we don't count it against itself
+        $activeBorrowed = Borrow::where('item_id', $newItem->Itemid)
+            ->where('id', '!=', $borrow->id)
+            ->whereIn('status', ['BORROWED', 'OVERDUE'])
+            ->sum('qty');
+
+        $available = ($newItem->qty ?? 0) - $activeBorrowed;
+
+        if ($available < $newQty) {
+            return back()->withErrors([
+                'error' => "Not enough stock. Available: {$available}",
+            ]);
+        }
+
+        $borrow->update([
+            'student_id' => $request->student_id,
+            'item_id'    => $request->item_id,
+            'qty'        => $newQty,
         ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Borrow updated successfully.',
+                'borrow'  => $this->borrowData($borrow),
+            ]);
+        }
+
+        return back()->with('success', 'Borrow updated successfully.');
     }
- 
-    return redirect()->route('borrows.index')
-        ->with('success', 'Borrow record restored successfully.');
-}
+
+    public function updateCallStatus(Request $request, Borrow $borrow)
+    {
+        $request->validate([
+            'call_status' => 'required|in:not_yet_called,called_done,no_answer,wrong_number',
+            'call_note'   => 'nullable|string|max:1000',
+        ]);
+
+        if ($request->call_status === 'wrong_number' && blank($request->call_note)) {
+            return back()->withErrors([
+                'call_note' => 'Please write note when phone number is wrong.',
+            ]);
+        }
+
+        $borrow->update([
+            'call_status' => $request->call_status,
+            'call_note'   => $request->call_note,
+            'called_at'   => $request->call_status === 'not_yet_called' ? null : now(),
+            'called_by'   => $request->call_status === 'not_yet_called' ? null : Auth::id(),
+        ]);
+
+        return back()->with('success', 'Call status updated successfully.');
+    }
 
     public function lateReturns(Request $request)
     {
@@ -450,98 +474,26 @@ public function restore(int $id)
         return view('backend.page.borrows.history', compact('histories'));
     }
 
-    public function update(Request $request)
+    // ── Shared helper to build borrow JSON response ──────────────
+    private function borrowData(Borrow $borrow, string $returnDate = null, string $condition = null, string $returnNotes = null, string $returnedBy = null): array
     {
-        $borrow = Borrow::findOrFail($request->borrow_id);
-
-        // Prevent editing returned borrow
-        if ($borrow->status === 'RETURNED') {
-            return back()->withErrors([
-                'error' => 'Cannot edit a returned borrow record.',
-            ]);
-        }
-
-        $oldItemId = $borrow->item_id;
-        $oldQty = $borrow->qty;
-
-        $newItemId = $request->item_id;
-        $newQty = $request->qty;
-
-        // Restore old stock
-        $oldItem = Item::find($oldItemId);
-        if ($oldItem) {
-            $oldItem->increment('qty', $oldQty);
-        }
-
-        // Check new stock
-        $newItem = Item::findOrFail($newItemId);
-
-        if ($newItem->qty < $newQty) {
-
-            // rollback old stock restore
-            $oldItem->decrement('qty', $oldQty);
-
-            return back()->withErrors([
-                'error' => 'Not enough stock for selected item.',
-            ]);
-        }
-
-        // reduce new stock
-        $newItem->decrement('qty', $newQty);
-
-        $borrow->update([
-            'student_id' => $request->student_id,
-            'item_id' => $newItemId,
-            'qty' => $newQty,
-        ]);
-
-         if ($request->ajax()) {
-        return response()->json([
-            'success' => true,
-            'message' => 'Borrow updated successfully.',
-            'borrow' => [
-                'id' => $borrow->id,
-                'student_name' => $borrow->student->student_name ?? 'N/A',
-                'gender' => $borrow->student->gender ?? 'N/A',
-                'group_name' => $borrow->student->group->group_name ?? 'N/A',
-                'item_name' => $borrow->item->display_name ?? 'N/A',
-                'qty' => $borrow->qty,
-                'borrow_date' => $borrow->borrow_date ? Carbon::parse($borrow->borrow_date)->format('d M Y H:i') : '-',
-                'return_date' => $borrow->return_date ? Carbon::parse($borrow->return_date)->format('d M Y H:i') : '-',
-                'status' => $borrow->status,
-                'condition' => $borrow->condition ?? '-',
-                'notes' => $borrow->notes ?? '-',
-                'return_notes' => $borrow->return_notes ?? '-',
-                'approved_by' => $borrow->approvedByUser->name ?? '-',
-                'returned_by' => $borrow->returnedByUser->name ?? '-',
-                'student_id' => $borrow->student_id,
-                'item_id' => $borrow->item_id,
-            ]
-        ]);
-    }
-        return back()->with('success', 'Borrow updated successfully.');
-    }
-
-    public function updateCallStatus(Request $request, Borrow $borrow)
-    {
-        $request->validate([
-            'call_status' => 'required|in:not_yet_called,called_done,no_answer,wrong_number',
-            'call_note' => 'nullable|string|max:1000',
-        ]);
-
-        if ($request->call_status === 'wrong_number' && blank($request->call_note)) {
-            return back()->withErrors([
-                'call_note' => 'Please write note when phone number is wrong.',
-            ]);
-        }
-
-        $borrow->update([
-            'call_status' => $request->call_status,
-            'call_note' => $request->call_note,
-            'called_at' => $request->call_status === 'not_yet_called' ? null : now(),
-            'called_by' => $request->call_status === 'not_yet_called' ? null : Auth::id(),
-        ]);
-
-        return back()->with('success', 'Call status updated successfully.');
+        return [
+            'id'           => $borrow->id,
+            'student_name' => $borrow->student->student_name ?? 'N/A',
+            'gender'       => $borrow->student->gender ?? 'N/A',
+            'group_name'   => $borrow->student->group->group_name ?? 'N/A',
+            'item_name'    => $borrow->item->display_name ?? 'N/A',
+            'qty'          => $borrow->qty,
+            'borrow_date'  => $borrow->borrow_date ? Carbon::parse($borrow->borrow_date)->format('d M Y H:i') : '-',
+            'return_date'  => $returnDate ?? ($borrow->return_date ? Carbon::parse($borrow->return_date)->format('d M Y H:i') : '-'),
+            'status'       => $borrow->status,
+            'condition'    => $condition ?? ($borrow->condition ?? '-'),
+            'notes'        => $borrow->notes ?? '-',
+            'return_notes' => $returnNotes ?? ($borrow->return_notes ?? '-'),
+            'approved_by'  => $borrow->approvedByUser->name ?? '-',
+            'returned_by'  => $returnedBy ?? ($borrow->returnedByUser->name ?? '-'),
+            'student_id'   => $borrow->student_id,
+            'item_id'      => $borrow->item_id,
+        ];
     }
 }

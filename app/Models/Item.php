@@ -28,6 +28,21 @@ class Item extends Model
         return $this->hasMany(Borrow::class, 'item_id', 'Itemid');
     }
 
+    public function getAvailableAttribute(): int
+    {
+        $borrowed = $this->borrows()
+            ->whereIn('status', ['BORROWED', 'OVERDUE'])
+            ->sum('qty');
+        return max(0, ($this->qty ?? 0) - $borrowed);
+    }
+
+    public function getBorrowAttribute(): int
+    {
+        return $this->borrows()
+            ->whereIn('status', ['BORROWED', 'OVERDUE'])
+            ->sum('qty');
+    }
+
     // public function getDisplayNameAttribute(): string
     // {
     //     $locale = app()->getLocale();

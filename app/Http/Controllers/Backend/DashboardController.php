@@ -31,11 +31,13 @@ class DashboardController extends Controller
         $socketAvailable = 0;
 
         if ($socketItem) {
-            $totalOut = Borrow::where('item_id', $socketItem->Itemid)
-                ->whereIn('status', ['BORROWED', 'OVERDUE'])
-                ->sum('qty');
+            // $totalOut = Borrow::where('item_id', $socketItem->Itemid)
+            //     ->whereIn('status', ['BORROWED', 'OVERDUE'])
+            //     ->sum('qty');
 
-            $socketAvailable = ($socketItem->qty ?? 0) - $totalOut;
+            // $socketAvailable = ($socketItem->qty ?? 0) - $totalOut;
+            $socketAvailable = $socketItem?->available ?? 0;
+            $totalOut = $socketItem?->borrow ?? 0;
         }
 
         $imageSocket = $socketItem; // null safe — blade uses ?->image

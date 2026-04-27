@@ -8,6 +8,8 @@ use App\Models\Borrow;
 use App\Models\StudentSubmission;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\View;
+use App\Observers\BorrowObserver;
+
 class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
@@ -35,5 +37,7 @@ public function boot(): void
             'lateReturnedCount'
         ));
     });
+    Borrow::observe(BorrowObserver::class);
+
 }
 }
