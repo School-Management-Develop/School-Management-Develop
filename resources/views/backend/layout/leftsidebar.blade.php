@@ -339,6 +339,14 @@
                                 <span class="sidebar-label">{{ __('app.students') }}</span>
                             </a>
                         </li>
+                        <li class="sidebar-menu-item">
+                            <a href="{{ route('teachers.index') }}"
+                                class="sidebar-link {{ request()->routeIs('teachers.*') ? 'active' : '' }}">
+                                <span class="sidebar-icon"><i class="bi bi-people-fill"></i></span>
+                                <span class="sidebar-label">{{ __('app.teachers') }}</span>
+                            </a>
+                        </li>
+                        
 
                         <li class="sidebar-menu-item">
                             <a href="{{ route('groups.index') }}"
@@ -448,6 +456,13 @@
                         class="sidebar-link {{ request()->routeIs('students.*') ? 'active' : '' }}">
                         <span class="sidebar-icon"><i class="bi bi-people"></i></span>
                         <span class="sidebar-label">{{ __('app.students') }}</span>
+                    </a>
+                </li>
+                 <li class="sidebar-menu-item">
+                    <a href="{{ route('teachers.index') }}"
+                        class="sidebar-link {{ request()->routeIs('teachers.*') ? 'active' : '' }}">
+                        <span class="sidebar-icon"><i class="bi bi-people-fill"></i></span>
+                        <span class="sidebar-label">{{ __('app.teachers') }}</span>
                     </a>
                 </li>
 

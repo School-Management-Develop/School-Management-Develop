@@ -168,7 +168,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center text-danger py-4">{{ __('app.no_data_found') }}
+                                    <td colspan="7" class="text-center text-danger py-4">{{ __('app.No Data found') }}
                                     </td>
                                 </tr>
                             @endforelse

@@ -4,6 +4,7 @@ return [
     'dashboard' => 'ផ្ទាំងគ្រប់គ្រង',
     'welcome_back' => 'សូមស្វាគមន៍ត្រឡប់មកវិញ, :name',
     'students' => 'សិស្ស',
+    'teachers' => 'គ្រូ',
     'items' => 'សម្ភារៈ',
     'groups' => 'ក្រុម',
     'submissions' => 'សំណើ',
@@ -274,4 +275,10 @@ return [
     'full_name' => 'ឈ្មោះពេញ',
     'Phone Number' => 'លេខទូរស័ព្ទ',
     'Optional' => 'មិនចាំបាច់',
+    'Teachers' => 'គ្រូ',
+    'Add Teacher' => 'បន្ថែមគ្រូ',
+    'Total Teachers' => 'គ្រូសរុប',
+    'No teachers found.' => 'មិនមានគ្រូណាមួយទេ។',
+    'teacher_name' => 'ឈ្មោះគ្រូ',
+    'unknown_number' => 'លេខមិនស្គាល់',
 ];

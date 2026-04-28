@@ -14,7 +14,7 @@ return new class extends Migration
     Schema::create('items', function (Blueprint $table) {
     $table->id('Itemid'); // primary key
     $table->string('name');
-    $table->decimal('available', 10, 2)->default(0);
+    $table->decimal('available')->default(0);
     $table->string('image')->nullable();
     $table->integer('qty')->default(0);
     $table->integer('borrow')->default(0);

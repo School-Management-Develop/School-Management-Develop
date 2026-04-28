@@ -5,6 +5,7 @@ return [
     'dashboard' => 'Dashboard',
     'welcome_back' => 'Welcome back, :name',
     'students' => 'Students',
+    'teachers' => 'Teachers',
     'items' => 'Items',
     'Group' => 'Groups',
     'submissions' => 'Submissions',
@@ -274,4 +275,10 @@ return [
     'full_name' => 'Fullname',
     'Phone Number' => 'Phone Number',
     'Optional' => 'Optional',
+    'Teachers' => 'Teachers',
+    'Add Teacher' => 'Add Teacher',
+    'Total Teachers' => 'Total Teachers',
+    'No teachers found.' => 'No teachers found.',
+    'teacher_name' => 'Teacher Name',
+    'unknown_number' => 'Unknown number',
 ];

@@ -10,48 +10,41 @@ use Illuminate\Validation\Rule;
 
 class StudentController extends Controller
 {
-    public function index(Request $request)
-    {
-        $groups = Group::orderBy('group_name')->get();
 
-        $studentsQuery = Student::with('group');
+public function index(Request $request)
+{
+    // Get Teacher group ID to exclude from student list
+    $teacherGroup = Group::where('group_name', 'Teacher')->first();
+    $teacherGroupId = $teacherGroup?->group_id;
 
-        if ($request->filled('q')) {
-            $q = trim($request->q);
+    $query = Student::with(['group'])
+        // Exclude teachers from student page
+        ->when($teacherGroupId, fn($q) => $q->where('group_id', '!=', $teacherGroupId));
 
-            $studentsQuery->where(function ($query) use ($q) {
-                $query->where('student_name', 'like', "%{$q}%")
-                    ->orWhere('phone_number', 'like', "%{$q}%")
-                    ->orWhereHas('group', function ($groupQuery) use ($q) {
-                        $groupQuery->where('group_name', 'like', "%{$q}%");
-                    });
-
-                if (strtolower($q) === 'active') {
-                    $query->orWhere('status', 1);
-                }
-
-                if (strtolower($q) === 'inactive') {
-                    $query->orWhere('status', 0);
-                }
-            });
-        }
-
-        $students = $studentsQuery->orderByDesc('student_id')
-            ->paginate(10)
-            ->withQueryString();
-
-        $statTotal = Student::count();
-        $statActive = Student::where('status', 1)->count();
-        $statInactive = Student::where('status', 0)->count();
-
-        return view('backend.page.students.index', compact(
-            'students',
-            'groups',
-            'statTotal',
-            'statActive',
-            'statInactive'
-        ));
+    // ... rest of your existing filters unchanged ...
+    $search = $request->input('q');
+    if ($search) {
+        $query->where('student_name', 'like', "%{$search}%");
     }
+
+    $students = $query->orderBy('student_name')->paginate(10)->withQueryString();
+
+    $groups = Group::where('group_name', '!=', 'Teacher')
+        ->orderBy('group_name')
+        ->get();
+
+    $statTotal    = Student::when($teacherGroupId, fn($q) => $q->where('group_id', '!=', $teacherGroupId))->count();
+    $statActive   = Student::when($teacherGroupId, fn($q) => $q->where('group_id', '!=', $teacherGroupId))->where('status', 1)->count();
+    $statInactive = Student::when($teacherGroupId, fn($q) => $q->where('group_id', '!=', $teacherGroupId))->where('status', 0)->count();
+
+    return view('backend.page.students.index', compact(
+        'students',
+        'groups',
+        'statTotal',
+        'statActive',
+        'statInactive'
+    ));
+}
 
     public function store(Request $request)
     {

@@ -8,6 +8,7 @@ use App\Http\Controllers\Backend\ItemController;
 use App\Http\Controllers\Backend\StudentController;
 use App\Http\Controllers\Backend\StudentRegisterController;
 use App\Http\Controllers\Backend\SubmissionController;
+use App\Http\Controllers\Backend\TeacherController;
 use App\Http\Controllers\Backend\UserController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -104,7 +105,6 @@ Route::middleware('auth')->group(function () {
 | Admin + Staff
 |--------------------------------------------------------------------------
 */
-
 Route::middleware(['auth', 'role:admin,staff'])
     ->prefix('admin')
     ->group(function () {
@@ -126,8 +126,8 @@ Route::middleware(['auth', 'role:admin,staff'])
         Route::put('/borrows/update', [BorrowController::class, 'update'])->name('borrows.update');
         Route::post('/borrows/{borrow}/undo-return', [BorrowController::class, 'undoReturn'])->name('borrows.undoReturn');
         Route::delete('/borrows/{borrow}', [BorrowController::class, 'destroy'])->name('borrows.destroy');
-        Route::get('/borrows/trashed',       [BorrowController::class, 'trashed'])->name('borrows.trashed');
-Route::post('/borrows/{id}/restore', [BorrowController::class, 'restore'])->name('borrows.restore');
+        Route::get('/borrows/trashed', [BorrowController::class, 'trashed'])->name('borrows.trashed');
+        Route::post('/borrows/{id}/restore', [BorrowController::class, 'restore'])->name('borrows.restore');
         Route::patch('/borrows/{borrow}/call-status', [BorrowController::class, 'updateCallStatus'])
             ->name('borrows.overdue.call-status');
 
@@ -165,6 +165,16 @@ Route::post('/borrows/{id}/restore', [BorrowController::class, 'restore'])->name
         Route::post('/students', [StudentController::class, 'store'])->name('students.store');
         Route::put('/students/{student_id}', [StudentController::class, 'update'])->name('students.update');
         Route::delete('/students/{student_id}', [StudentController::class, 'destroy'])->name('students.destroy');
+
+        /*
+        |--------------------------------------------------------------------------
+        | teachers
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.index');
+        Route::post('/teachers', [TeacherController::class, 'store'])->name('teachers.store');
+        Route::put('/teachers/{teacher}', [TeacherController::class, 'update'])->name('teachers.update');
+        Route::delete('/teachers/{teacher}', [TeacherController::class, 'destroy'])->name('teachers.destroy');
 
         /*
         |--------------------------------------------------------------------------
