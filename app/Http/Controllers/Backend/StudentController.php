@@ -12,6 +12,31 @@ class StudentController extends Controller
 {
     public function index(Request $request)
     {
+        // Get Teacher group ID to exclude from student list
+        $teacherGroup = Group::where('group_name', 'Teacher')->first();
+        $teacherGroupId = $teacherGroup?->group_id;
+
+        $query = Student::with(['group'])
+            // Exclude teachers from student page
+            ->when($teacherGroupId, fn($q) => $q->where('group_id', '!=', $teacherGroupId));
+
+        // ... rest of your existing filters unchanged ...
+        $search = $request->input('q');
+        if ($search) {
+            $query->where('student_name', 'like', "%{$search}%");
+        }
+
+        $students = $query->orderBy('student_name')->paginate(10)->withQueryString();
+
+        $groups = Group::where('group_name', '!=', 'Teacher')
+            ->orderBy('group_name')
+            ->get();
+
+        $statTotal    = Student::when($teacherGroupId, fn($q) => $q->where('group_id', '!=', $teacherGroupId))->count();
+
+        $statActive   = Student::when($teacherGroupId, fn($q) => $q->where('group_id', '!=', $teacherGroupId))->where('status', 1)->count();
+        $statInactive = Student::when($teacherGroupId, fn($q) => $q->where('group_id', '!=', $teacherGroupId))->where('status', 0)->count();
+
         $groups = Group::orderBy('group_name')->get();
 
         $studentsQuery = Student::with('group');
@@ -40,18 +65,18 @@ class StudentController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        $statTotal    = Student::count();
-        $statActive   = Student::where('status', 1)->count();
+        $statTotal = Student::count();
+        $statActive = Student::where('status', 1)->count();
         $statInactive = Student::where('status', 0)->count();
 
-        return view('backend.page.students.index', compact(
-            'students',
-            'groups',
-            'statTotal',
-            'statActive',
-            'statInactive'
-        ));
-    }
+    return view('backend.page.students.index', compact(
+        'students',
+        'groups',
+        'statTotal',
+        'statActive',
+        'statInactive'
+    ));
+}
 
     public function store(Request $request)
     {
