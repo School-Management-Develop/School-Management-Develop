@@ -556,6 +556,7 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.exists) {
+                                studentNameInput.value = data.student_name;
                                 genderSelect.value = data.gender || '';
                                 phoneNumberInput.value = data.phone_number || '';
                                 groupSearchInput.value = data.group_name || '';

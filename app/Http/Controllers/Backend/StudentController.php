@@ -40,8 +40,8 @@ class StudentController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        $statTotal = Student::count();
-        $statActive = Student::where('status', 1)->count();
+        $statTotal    = Student::count();
+        $statActive   = Student::where('status', 1)->count();
         $statInactive = Student::where('status', 0)->count();
 
         return view('backend.page.students.index', compact(
@@ -56,24 +56,32 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         $messages = [
-            'student_name.unique' => 'This student name already exists',
             'phone_number.unique' => 'This phone number already exists.',
         ];
 
         $data = $request->validate([
-            'student_name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('students')->where(function ($q) use ($request) {
-                    return $q->where('group_id', $request->group_id);
-                }),
-            ],
-            'gender' => ['required', 'in:Male,Female'],
+            'student_name' => ['required', 'string', 'max:255'],
+            'gender'       => ['required', 'in:Male,Female'],
             'phone_number' => ['nullable', 'string', 'max:50', 'unique:students,phone_number'],
-            'group_id' => ['required', 'exists:groups,group_id'],
-            'status' => ['required', 'in:0,1'],
+            'group_id'     => ['required', 'exists:groups,group_id'],
+            'status'       => ['required', 'in:0,1'],
         ], $messages);
+
+        // Rule::unique cannot be used here because it passes the raw input
+        // to SQL. We normalize first, then check manually.
+        $normalized = strtolower(
+            preg_replace('/[\s\x{200B}\x{200C}\x{FEFF}\x{00A0}]+/u', '', $request->student_name)
+        );
+
+        $duplicate = Student::where('student_name_normalized', $normalized)
+            ->where('group_id', $request->group_id)
+            ->exists();
+
+        if ($duplicate) {
+            return back()
+                ->withErrors(['student_name' => 'A student with this name (or an equivalent spelling) already exists in this group.'])
+                ->withInput();
+        }
 
         Student::create($data);
 
@@ -92,19 +100,12 @@ class StudentController extends Controller
         $student = Student::where('student_id', $student_id)->firstOrFail();
 
         $messages = [
-            'student_name.unique' => 'This student name already exists.',
+            'phone_number.unique' => 'This phone number already exists.',
         ];
 
         $data = $request->validate([
-            'student_name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('students')
-                    ->where(fn ($q) => $q->where('group_id', $request->group_id))
-                    ->ignore($student->student_id, 'student_id'),
-            ],
-            'gender' => ['required', 'in:Male,Female'],
+            'student_name' => ['required', 'string', 'max:255'],
+            'gender'       => ['required', 'in:Male,Female'],
             'phone_number' => [
                 'nullable',
                 'string',
@@ -112,8 +113,23 @@ class StudentController extends Controller
                 Rule::unique('students', 'phone_number')->ignore($student->student_id, 'student_id'),
             ],
             'group_id' => ['required', 'exists:groups,group_id'],
-            'status' => ['required', 'in:0,1'],
+            'status'   => ['required', 'in:0,1'],
         ], $messages);
+
+        $normalized = strtolower(
+            preg_replace('/[\s\x{200B}\x{200C}\x{FEFF}\x{00A0}]+/u', '', $request->student_name)
+        );
+
+        $duplicate = Student::where('student_name_normalized', $normalized)
+            ->where('group_id', $request->group_id)
+            ->where('student_id', '!=', $student->student_id) // exclude current student
+            ->exists();
+
+        if ($duplicate) {
+            return back()
+                ->withErrors(['student_name' => 'A student with this name (or an equivalent spelling) already exists in this group.'])
+                ->withInput();
+        }
 
         $student->update($data);
 
