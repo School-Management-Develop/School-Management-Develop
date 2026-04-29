@@ -283,4 +283,5 @@ return [
     'unknown_number' => 'Unknown number',
     'All Groups' => 'All Groups',
     'Search group...' => 'Search group...',
+    'this group is not found' => 'This group is not found',
 ];

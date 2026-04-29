@@ -15,7 +15,7 @@
     <link href="https://googleapis.com/css2?family=Noto+Sans+Khmer:wght@100..900&display=swap" rel="stylesheet">
 
     <style>
-       @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@100..900&family=Siemreap&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@100..900&family=Siemreap&display=swap');
 
         html[lang="kh"] body {
             font-family: "Noto Sans Khmer", sans-serif;
@@ -121,7 +121,6 @@
             color: #212529 !important;
         }
 
-        /* Fix toggle button black flash */
         .dropdown .btn.show,
         .dropdown .btn:active,
         .dropdown .btn:focus,
@@ -165,8 +164,9 @@
             .header-wrap .title-box h3 {
                 font-size: 1.1rem;
             }
-            .text-end{
-                margin-right: 3%    ;
+
+            .text-end {
+                margin-right: 3%;
             }
         }
 
@@ -184,16 +184,30 @@
             border-radius: 10px !important;
             padding-top: 6px !important;
         }
-        .gray{
+
+        .gray {
             opacity: 0.6;
-            
         }
+
         .logo-img {
             margin-left: 2.8%;
         }
+
+        /* Inline group error box */
+        .group-error-box {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            background: #FEF2F2;
+            border-left: 4px solid #ef4444;
+            border-radius: 0 8px 8px 0;
+            padding: 10px 14px;
+            margin-top: 6px;
+            font-size: 13px;
+            color: #dc2626;
+        }
     </style>
 </head>
-
 
 <body>
 
@@ -206,52 +220,8 @@
             </div>
         </div>
 
-
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                @if (session('success'))
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Done!',
-                        text: "{{ session('success') }}",
-                        confirmButtonColor: '#198754',
-                        timer: 4000
-                    });
-                @endif
-
-                @if ($errors->any())
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        html: `
-                    <div style="text-align: left;">
-                        <ul class="list-group list-group-flush">
-                            @foreach ($errors->all() as $error)
-                                <li class="list-group-item text-danger border-0 text-center rgb">
-                                    <i class="bi bi-x-circle me-2"></i> {{ $error }}
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                `,
-                        confirmButtonColor: '#dc3545',
-                    });
-                @endif
-
-                @if (session('error'))
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Wait a minute...',
-                        text: "{{ session('error') }}",
-                        confirmButtonColor: '#ffc107',
-                    });
-                @endif
-            });
-        </script>
-
-
         <div class="card shadow-sm border-0 p-3">
-            <div class="dropdown text-end ">
+            <div class="dropdown text-end">
                 <button class="btn rounded-pill px-3 py-2 shadow-sm dropdown-toggle" type="button"
                     data-bs-toggle="dropdown" aria-expanded="false">
                     @if (app()->getLocale() == 'kh')
@@ -262,7 +232,6 @@
                             height="23" class="rounded-circle">&nbsp;{{ __('app.english') }}
                     @endif
                 </button>
-
                 <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-4 p-2 mt-2 language-menu">
                     <li>
                         <a class="dropdown-item rounded-3 text-center py-2" href="{{ route('language.switch', 'en') }}"
@@ -280,8 +249,8 @@
                     </li>
                 </ul>
             </div>
+
             <div class="card-body p-4">
-                <i class="fa-light fa-brake-warning"></i>
 
                 <form method="POST" action="{{ route('submissions.store.public') }}" id="registerForm">
                     @csrf
@@ -290,7 +259,8 @@
                     <div class="mb-3">
                         <label class="form-label">{{ __('app.Student Name') }} <span class="redred">*</span></label>
                         <input type="text" id="student_name" name="student_name" class="form-control"
-                            list="students_list" autocomplete="off" value="{{ old('student_name') }}" placeholder="{{ __('app.full_name') }}" required>
+                            list="students_list" autocomplete="off" value="{{ old('student_name') }}"
+                            placeholder="{{ __('app.full_name') }}" required>
                         <small id="student_help" class="text-muted"></small>
                     </div>
 
@@ -299,13 +269,19 @@
                         <label class="form-label">{{ __('app.groups') }} <span class="redred">*</span></label>
                         <input type="text" id="group_search" name="group_search" class="form-control"
                             list="groups_list" placeholder="{{ __('app.Input group name') }}" autocomplete="off"
-                            value="{{ old('group_search') }}" oninput="this.value = this.value.toUpperCase()" required>
+                            value="{{ old('group_search') }}" oninput="this.value = this.value.toUpperCase()">
                         <datalist id="groups_list">
                             @foreach ($groups as $g)
                                 <option value="{{ $g->group_name }}" data-id="{{ $g->group_id }}"></option>
                             @endforeach
                         </datalist>
                         <input type="hidden" name="group_id" id="group_id">
+
+                        <!-- Inline group error -->
+                        <div id="group_error" class="group-error-box">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <span id="group_error_text"></span>
+                        </div>
                     </div>
 
                     <!-- GENDER -->
@@ -324,14 +300,15 @@
                     <div class="mb-3">
                         <label class="form-label">{{ __('app.Phone Number') }} <span class="redred">*</span></label>
                         <input type="text" id="phone_number" name="phone_number" class="form-control"
-                            value="{{ old('phone_number') }}" maxlength="10" inputmode="numeric" placeholder="{{__('app.Phone Number')}}" required>
+                            value="{{ old('phone_number') }}" maxlength="10" inputmode="numeric"
+                            placeholder="{{ __('app.Phone Number') }}" required>
                         <small id="phone_error" class="text-danger"></small>
                     </div>
 
                     <!-- ITEM SELECT -->
                     <div class="mb-3">
                         <label class="form-label">{{ __('app.item') }} <span class="redred">*</span></label>
-                        <select  id="item_id" name="item_id" placeholder="{{ __('app.Select or type item...') }}"
+                        <select id="item_id" name="item_id" placeholder="{{ __('app.Select or type item...') }}"
                             required>
                             <option value="">Search item...</option>
                             @foreach ($items as $item)
@@ -344,6 +321,7 @@
                         </select>
                     </div>
 
+                    <!-- ADAPTER WARNING -->
                     <div id="error_alert" class="d-none"
                         style="display:flex; gap:10px; align-items:flex-start;
                             border-left:4px solid #F59E0B;
@@ -398,121 +376,147 @@
                     </button>
 
                 </form>
-
             </div>
         </div>
 
         <div class="text-center text-muted mt-3" style="font-size:13px">
             &copy; {{ date('Y') }} Setec Institute System. All rights reserved.
         </div>
-
     </div>
 
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const originalSelect = document.getElementById('item_id');
-            const qtySelect = document.getElementById('qty');
-            const itemPreview = document.getElementById('itemPreview');
-            const previewImage = document.getElementById('previewImage');
-            const previewName = document.getElementById('previewName');
-            const studentNameInput = document.getElementById('student_name');
-            const genderSelect = document.getElementById('gender');
-            const phoneNumberInput = document.getElementById('phone_number');
-            const phoneError = document.getElementById('phone_error');
-            const groupSearchInput = document.getElementById('group_search');
-            const groupIdInput = document.getElementById('group_id');
-            const groupsList = document.getElementById('groups_list');
-            const studentHelp = document.getElementById('student_help');
-            const erroradapter = document.getElementById('error_alert');
-            const form = document.getElementById('registerForm');
-            const submitBtn = document.getElementById('submitBtn');
-            const icon = document.getElementById('icon');
-            const notesWrapper = document.getElementById('notes_wrapper');
-            const notesField = document.getElementById('notes');
+        document.addEventListener('DOMContentLoaded', function () {
 
-            function setQtyOptions(isSocket) {
-                qtySelect.innerHTML = '';
-                const qtyList = isSocket ? [1, 2, 3] : [1];
-                qtyList.forEach(function(num) {
-                    const option = document.createElement('option');
-                    option.value = num;
-                    option.textContent = num;
-                    qtySelect.appendChild(option);
+            // ── SweetAlert flash messages ─────────────────────────────────────
+            @if (session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Done!',
+                    text: "{{ session('success') }}",
+                    confirmButtonColor: '#198754',
+                    timer: 4000
                 });
-                qtySelect.value = '1';
-            }
+            @endif
 
-            function updateItemUI(selectedValue) {
-                const selectedOption = originalSelect.querySelector('option[value="' + selectedValue + '"]');
+            @if ($errors->any())
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    html: `<div style="text-align:left;">
+                        <ul class="list-group list-group-flush">
+                            @foreach ($errors->all() as $error)
+                                <li class="list-group-item text-danger border-0 text-center">
+                                    <i class="bi bi-x-circle me-2"></i> {{ $error }}
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>`,
+                    confirmButtonColor: '#dc3545',
+                });
+            @endif
 
-                if (!selectedOption || !selectedValue) {
-                    previewImage.src = '';
-                    previewName.textContent = '';
-                    itemPreview.style.display = 'none';
-                    setQtyOptions(false);
-                    return;
-                }
+            @if (session('error'))
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Wait a minute...',
+                    text: "{{ session('error') }}",
+                    confirmButtonColor: '#ffc107',
+                });
+            @endif
 
-                const image = selectedOption.getAttribute('data-image') || '';
-                const name = selectedOption.getAttribute('data-name') || '';
-                const lowerName = name.toLowerCase().trim();
+            // ── Element refs ──────────────────────────────────────────────────
+            const originalSelect    = document.getElementById('item_id');
+            const qtySelect         = document.getElementById('qty');
+            const itemPreview       = document.getElementById('itemPreview');
+            const previewImage      = document.getElementById('previewImage');
+            const previewName       = document.getElementById('previewName');
+            const studentNameInput  = document.getElementById('student_name');
+            const genderSelect      = document.getElementById('gender');
+            const phoneNumberInput  = document.getElementById('phone_number');
+            const phoneError        = document.getElementById('phone_error');
+            const groupSearchInput  = document.getElementById('group_search');
+            const groupIdInput      = document.getElementById('group_id');
+            const groupsList        = document.getElementById('groups_list');
+            const groupError        = document.getElementById('group_error');
+            const groupErrorText    = document.getElementById('group_error_text');
+            const studentHelp       = document.getElementById('student_help');
+            const erroradapter      = document.getElementById('error_alert');
+            const form              = document.getElementById('registerForm');
+            const submitBtn         = document.getElementById('submitBtn');
+            const notesWrapper      = document.getElementById('notes_wrapper');
+            const notesField        = document.getElementById('notes');
 
-                erroradapter.classList.add('d-none');
-                if (lowerName.includes('adaptor laptop') || lowerName.includes('ឆ្នាំងសាក laptop') || lowerName
-                    .includes('adaptor​ laptop')) {
-                    document.getElementById('alert_text').textContent =
-                        '{{ __('app.Please check if the charger is compatible with the laptop.') }}';
-                    erroradapter.classList.remove('d-none');
-                }
-
-                previewImage.src = image;
-                previewName.textContent = name;
-                itemPreview.style.display = 'block';
-
-                const isSocket = lowerName.includes('socket') || lowerName.includes('ព្រី');
-                setQtyOptions(isSocket);
-
-                // Show notes field only when "other" is selected
-                const isOther = !lowerName.includes('socket') ;
-                if (isOther) {
-                    notesWrapper.classList.remove('d-none');
-                } else {
-                    notesWrapper.classList.add('d-none');
-                    notesField.value = '';
-                }
-            }
-
-            new TomSelect('#item_id', {
-                create: false,
-                sortField: { field: 'text', direction: 'asc' },
-                onChange: function(value) {
-                    updateItemUI(value);
-                }
-            });
-
+            // ── Group helpers ─────────────────────────────────────────────────
             function syncGroupId() {
                 const value = groupSearchInput.value.trim();
                 groupIdInput.value = '';
-                const options = groupsList.querySelectorAll('option');
-                for (const opt of options) {
-                    if (opt.value === value) {
-                        groupIdInput.value = opt.dataset.id;
-                        break;
-                    }
+                groupsList.querySelectorAll('option').forEach(opt => {
+                    if (opt.value === value) groupIdInput.value = opt.dataset.id;
+                });
+            }
+
+            function showGroupError(msg) {
+                groupErrorText.textContent = msg;
+                groupError.style.display   = 'flex';
+                groupSearchInput.style.borderColor = '#ef4444';
+                groupSearchInput.setCustomValidity(msg);
+            }
+
+            function clearGroupError() {
+                groupError.style.display   = 'none';
+                groupErrorText.textContent = '';
+                groupSearchInput.style.borderColor = '#22c55e';
+                groupSearchInput.setCustomValidity('');
+            }
+
+            function validateGroup() {
+                syncGroupId();
+                const typed = groupSearchInput.value.trim();
+
+                if (!typed) {
+                    groupError.style.display = 'none';
+                    groupSearchInput.style.borderColor = '';
+                    groupSearchInput.setCustomValidity('{{ __('app.this group is not found') }}');
+                    return false;
                 }
+
+                if (!groupIdInput.value) {
+                    showGroupError('{{ __('app.this group is not found') }}');
+                    return false;
+                }
+
+                clearGroupError();
+                return true;
             }
 
-            function clearAutoFilledFields() {
-                genderSelect.value = '';
-                phoneNumberInput.value = '';
-                groupSearchInput.value = '';
-                groupIdInput.value = '';
-            }
+            // ── Group events ──────────────────────────────────────────────────
+            groupSearchInput.addEventListener('input', function () {
+                syncGroupId();
+                const typed = this.value.trim();
 
+                if (!typed) {
+                    groupError.style.display = 'none';
+                    this.style.borderColor   = '';
+                    this.setCustomValidity('');
+                    return;
+                }
+
+                if (!groupIdInput.value) {
+                    showGroupError('{{ __('app.this group is not found') }}');
+                } else {
+                    clearGroupError();
+                }
+            });
+
+            groupSearchInput.addEventListener('blur', function () {
+                validateGroup();
+            });
+
+            // ── Phone helpers ─────────────────────────────────────────────────
             function validateKhmerPhoneNumber() {
                 const value = phoneNumberInput.value.trim();
                 phoneError.textContent = '';
@@ -524,12 +528,11 @@
                     return false;
                 }
                 if (!/^0[0-9]{8,9}$/.test(value)) {
-                    phoneError.textContent =
-                        '{{ __('app.Phone number must be 9 or 10 digits and start with 0.') }}';
+                    phoneError.textContent = '{{ __('app.Phone number must be 9 or 10 digits and start with 0.') }}';
                     phoneNumberInput.setCustomValidity('Invalid phone number');
                     return false;
                 }
-                if (value === '0123456789' || value === '0987654321' || value === '0000000000') {
+                if (['0123456789', '0987654321', '0000000000'].includes(value)) {
                     phoneError.textContent = '{{ __('app.Please enter a valid phone number.') }}';
                     phoneNumberInput.setCustomValidity('Invalid phone number');
                     return false;
@@ -537,104 +540,145 @@
                 return true;
             }
 
-            let studentTimer = null;
-
-            studentNameInput.addEventListener('input', function() {
-                clearTimeout(studentTimer);
-                const studentName = this.value.trim();
-                studentHelp.textContent = '';
-
-                if (studentName.length < 2) {
-                    clearAutoFilledFields();
-                    return;
-                }
-
-                studentTimer = setTimeout(() => {
-                    fetch(
-                            `{{ route('register.checkStudentName') }}?student_name=${encodeURIComponent(studentName)}`
-                        )
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.exists) {
-                                studentNameInput.value = data.student_name;
-                                genderSelect.value = data.gender || '';
-                                phoneNumberInput.value = data.phone_number || '';
-                                groupSearchInput.value = data.group_name || '';
-                                syncGroupId();
-                                studentHelp.className = 'text-success';
-                            } else {
-                                clearAutoFilledFields();
-                                studentHelp.textContent = '';
-                            }
-                        })
-                        .catch(error => {
-                            clearAutoFilledFields();
-                            studentHelp.textContent = '';
-                            console.error('Student name check error:', error);
-                        });
-                }, 300);
-            });
-
-            groupSearchInput.addEventListener('input', function() {
-                syncGroupId();
-                groupSearchInput.setCustomValidity('');
-            });
-
-            groupSearchInput.addEventListener('blur', function() {
-                syncGroupId();
-                if (!groupIdInput.value) {
-                    groupSearchInput.setCustomValidity(
-                        '{{ __('app.Please choose a group from the suggestion list.') }}');
-                } else {
-                    groupSearchInput.setCustomValidity('');
-                }
-            });
-
-            phoneNumberInput.addEventListener('input', function() {
+            phoneNumberInput.addEventListener('input', function () {
                 this.value = this.value.replace(/\D/g, '').slice(0, 10);
                 phoneError.textContent = '';
                 this.setCustomValidity('');
             });
 
-            phoneNumberInput.addEventListener('keypress', function(e) {
-                if (!/[0-9]/.test(e.key)) {
-                    e.preventDefault();
-                }
+            phoneNumberInput.addEventListener('keypress', function (e) {
+                if (!/[0-9]/.test(e.key)) e.preventDefault();
             });
 
-            form.addEventListener('submit', function(e) {
-                const isPhoneValid = validateKhmerPhoneNumber();
-                syncGroupId();
+            // ── Item UI ───────────────────────────────────────────────────────
+            function setQtyOptions(isSocket) {
+                qtySelect.innerHTML = '';
+                (isSocket ? [1, 2, 3] : [1]).forEach(num => {
+                    const opt = document.createElement('option');
+                    opt.value = num;
+                    opt.textContent = num;
+                    qtySelect.appendChild(opt);
+                });
+                qtySelect.value = '1';
+            }
 
-                if (!groupIdInput.value) {
-                    groupSearchInput.setCustomValidity(
-                        '{{ __('app.Please choose a group from the suggestion list.') }}');
-                } else {
-                    groupSearchInput.setCustomValidity('');
+            function updateItemUI(selectedValue) {
+                const selectedOption = originalSelect.querySelector(`option[value="${selectedValue}"]`);
+
+                if (!selectedOption || !selectedValue) {
+                    previewImage.src = '';
+                    previewName.textContent = '';
+                    itemPreview.style.display = 'none';
+                    setQtyOptions(false);
+                    return;
                 }
 
-                if (!isPhoneValid || !groupIdInput.value) {
+                const image     = selectedOption.getAttribute('data-image') || '';
+                const name      = selectedOption.getAttribute('data-name')  || '';
+                const lowerName = name.toLowerCase().trim();
+
+                erroradapter.classList.add('d-none');
+                if (
+                    lowerName.includes('adaptor laptop') ||
+                    lowerName.includes('ឆ្នាំងសាក laptop') ||
+                    lowerName.includes('adaptor​ laptop')
+                ) {
+                    document.getElementById('alert_text').textContent =
+                        '{{ __('app.Please check if the charger is compatible with the laptop.') }}';
+                    erroradapter.classList.remove('d-none');
+                }
+
+                previewImage.src          = image;
+                previewName.textContent   = name;
+                itemPreview.style.display = 'block';
+
+                const isSocket = lowerName.includes('socket') || lowerName.includes('ព្រី');
+                setQtyOptions(isSocket);
+
+                if (!isSocket) {
+                    notesWrapper.classList.remove('d-none');
+                } else {
+                    notesWrapper.classList.add('d-none');
+                    notesField.value = '';
+                }
+            }
+
+            new TomSelect('#item_id', {
+                create: false,
+                sortField: { field: 'text', direction: 'asc' },
+                onChange: value => updateItemUI(value)
+            });
+
+            // ── Student autofill ──────────────────────────────────────────────
+            function clearAutoFilledFields() {
+                genderSelect.value      = '';
+                phoneNumberInput.value  = '';
+                groupSearchInput.value  = '';
+                groupIdInput.value      = '';
+            }
+
+            let studentTimer = null;
+            studentNameInput.addEventListener('input', function () {
+                clearTimeout(studentTimer);
+                const studentName = this.value.trim();
+                studentHelp.textContent = '';
+
+                if (studentName.length < 2) { clearAutoFilledFields(); return; }
+
+                studentTimer = setTimeout(() => {
+                    fetch(`{{ route('register.checkStudentName') }}?student_name=${encodeURIComponent(studentName)}`)
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.exists) {
+                                studentNameInput.value  = data.student_name;
+                                genderSelect.value      = data.gender        || '';
+                                phoneNumberInput.value  = data.phone_number  || '';
+                                groupSearchInput.value  = data.group_name    || '';
+                                syncGroupId();
+                                studentHelp.className   = 'text-success';
+                            } else {
+                                clearAutoFilledFields();
+                                studentHelp.textContent = '';
+                            }
+                        })
+                        .catch(err => {
+                            clearAutoFilledFields();
+                            studentHelp.textContent = '';
+                            console.error('Student name check error:', err);
+                        });
+                }, 300);
+            });
+
+            // ── Form submit ───────────────────────────────────────────────────
+            form.addEventListener('submit', function (e) {
+                const isPhoneValid = validateKhmerPhoneNumber();
+                const isGroupValid = validateGroup();
+
+                if (!isPhoneValid || !isGroupValid) {
                     e.preventDefault();
-                    if (!groupIdInput.value) {
-                        groupSearchInput.reportValidity();
+                    if (!isGroupValid) {
+                        groupSearchInput.focus();
                     } else {
                         phoneNumberInput.reportValidity();
                     }
                     return;
                 }
-                submitBtn.disabled = true;
-                submitBtn.textContent = '{{ __('app.Submitting...') }}';
+
+                submitBtn.disabled     = true;
+                submitBtn.textContent  = '{{ __('app.Submitting...') }}';
             });
 
-            updateItemUI(originalSelect.value || '');
-            syncGroupId();
-
-            document.getElementById('policy').addEventListener('change', function() {
+            // ── Policy checkbox ───────────────────────────────────────────────
+            document.getElementById('policy').addEventListener('change', function () {
                 submitBtn.disabled = !this.checked;
             });
+
+            // ── Init ──────────────────────────────────────────────────────────
+            updateItemUI(originalSelect.value || '');
+            syncGroupId();
         });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script src="{{ asset('assets/js/fcf4581152.js') }}"></script>
     <script src="https://kit.fontawesome.com/fcf4581152.js" crossorigin="anonymous"></script>
 </body>
