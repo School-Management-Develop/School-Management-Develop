@@ -889,7 +889,10 @@
                                     <option value="3">3</option>
                                 </select>
                             </div>
-
+                            {{-- <div class="col-md-6">
+                                <label class="form-label">note</label>
+                                <input type="text" name="note" id="edit_note" class="form-control">
+                            </div> --}}
                         </div>
 
                     </div>

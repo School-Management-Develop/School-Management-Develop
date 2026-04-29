@@ -281,4 +281,6 @@ return [
     'No teachers found.' => 'មិនមានគ្រូណាមួយទេ។',
     'teacher_name' => 'ឈ្មោះគ្រូ',
     'unknown_number' => 'លេខមិនស្គាល់',
+    'All Groups' => 'ក្រុមទាំងអស់',
+    'Search group...' => 'ស្វែងរកក្រុម...',
 ];

@@ -281,4 +281,6 @@ return [
     'No teachers found.' => 'No teachers found.',
     'teacher_name' => 'Teacher Name',
     'unknown_number' => 'Unknown number',
+    'All Groups' => 'All Groups',
+    'Search group...' => 'Search group...',
 ];

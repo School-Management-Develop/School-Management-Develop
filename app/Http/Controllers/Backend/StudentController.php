@@ -19,7 +19,10 @@ class StudentController extends Controller
         // Single query — always excludes the Teacher group
         $studentsQuery = Student::with('group')
             ->when($teacherGroupId, fn($q) => $q->where('group_id', '!=', $teacherGroupId));
-
+            
+        if ($request->filled('group_id')) {
+        $studentsQuery->where('group_id', $request->group_id);
+}
         // Multi-column search
         if ($request->filled('q')) {
             $q = trim($request->q);
