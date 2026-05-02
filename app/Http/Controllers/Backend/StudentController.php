@@ -18,6 +18,7 @@ class StudentController extends Controller
 
         // Single query — always excludes the Teacher group
         $studentsQuery = Student::with('group')
+            ->withCount('borrows')
             ->when($teacherGroupId, fn($q) => $q->where('group_id', '!=', $teacherGroupId));
             
         if ($request->filled('group_id')) {

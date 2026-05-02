@@ -68,7 +68,7 @@ class BorrowController extends Controller
             ->get();
 
         $borrows = $query->orderByDesc('id')->paginate(20)->withQueryString();
-
+       
         $stats = [
             'total_records'   => Borrow::count(),
             'active_records'  => Borrow::where('status', 'BORROWED')->count(),
@@ -355,6 +355,7 @@ class BorrowController extends Controller
             'student_id' => $request->student_id,
             'item_id'    => $request->item_id,
             'qty'        => $newQty,
+            'notes'       => $request->notes
         ]);
 
         if ($request->ajax()) {
@@ -417,7 +418,7 @@ class BorrowController extends Controller
 
         $query = Borrow::query()
             ->whereNull('return_date')
-            ->where('borrow_date', '<', now()->subDays(3))
+            ->where('borrow_date', '<', now()->subDays(2))
             ->whereIn('status', ['BORROWED', 'OVERDUE'])
             ->with(['student', 'item', 'calledByUser']);
 

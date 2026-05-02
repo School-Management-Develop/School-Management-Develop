@@ -284,4 +284,9 @@ return [
     'All Groups' => 'ក្រុមទាំងអស់',
     'Search group...' => 'ស្វែងរកក្រុម...',
     'this group is not found' => 'រកមិនឃើញក្រុមនេះ',
+    'View Details' => 'មើលព័ត៌មានលម្អិត',
+    'Submission Details' => 'ព័ត៌មានលម្អិតនៃការដាក់ស្នើ',
+    'Submitted At' => 'ដាក់ស្នើនៅ',
+    'Borrow' => 'ខ្ចី',
+    'times' => 'ដង',
 ];

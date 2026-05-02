@@ -154,7 +154,8 @@
                                 </th>
 
                                 <th>{{ __('app.Status') }}</th>
-                                <th class="text-end" style="width:180px;">{{ __('app.action') }}</th>
+                                <th>{{ __('app.Borrow') }}</th> 
+                                <th class="text-center" style="width:180px;">{{ __('app.action') }}</th>
                             </tr>
                         </thead>
 
@@ -178,6 +179,11 @@
                                                 {{ __('app.inactive_students') }}
                                             </span>
                                         @endif
+                                    </td>
+                                    <td>
+                                        <span class="badge rounded-pill bg-primary text-white px-3 py-2">
+                                            {{ $s->borrows_count ?? 0 }} {{ __('app.times') }}
+                                        </span>
                                     </td>
                                     <td class="text-end">
                                         <button type="button" class="btn btn-light btn-sm me-1"
@@ -206,7 +212,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center text-danger py-4">
+                                    <td colspan="8" class="text-center text-danger py-4">
                                         {{ __('app.No Data found') }}
                                     </td>
                                 </tr>

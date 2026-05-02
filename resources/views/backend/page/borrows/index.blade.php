@@ -499,7 +499,7 @@
                                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
                                                 data-bs-target="#editBorrowModal" data-id="{{ $borrow->id }}"
                                                 data-student="{{ $borrow->student_id }}"
-                                                data-item="{{ $borrow->item_id }}" data-qty="{{ $borrow->qty }}"
+                                                data-item="{{ $borrow->item_id }}" data-qty="{{ $borrow->qty }}" data-notes="{{ $borrow->notes }}"
                                                 style="margin-bottom: 5px">
                                                 Edit
                                             </button>
@@ -889,10 +889,10 @@
                                     <option value="3">3</option>
                                 </select>
                             </div>
-                            {{-- <div class="col-md-6">
+                            <div class="col-md-6">
                                 <label class="form-label">note</label>
-                                <input type="text" name="note" id="edit_note" class="form-control">
-                            </div> --}}
+                                <input type="text" name="notes" id="edit_note" class="form-control">
+                            </div>
                         </div>
 
                     </div>
@@ -1368,9 +1368,11 @@
                 const studentId = button.getAttribute('data-student');
                 const itemId = button.getAttribute('data-item');
                 const qty = button.getAttribute('data-qty');
+                const notes = button.getAttribute('data-notes');
 
                 document.getElementById('edit_borrow_id').value = borrowId;
                 document.getElementById('edit_qty').value = qty;
+                document.getElementById('edit_note').value = notes || '';
 
                 setTimeout(() => {
                     document.getElementById('edit_student_id').value = studentId;
@@ -1403,6 +1405,7 @@
                 data-student="${borrow.student_id}"
                 data-item="${borrow.item_id}"
                 data-qty="${borrow.qty}"
+                data-notes="${escapeHtml(borrow.notes ?? '')}"
                 style="margin-bottom:5px">
                 Edit
             </button>

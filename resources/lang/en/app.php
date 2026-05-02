@@ -284,4 +284,9 @@ return [
     'All Groups' => 'All Groups',
     'Search group...' => 'Search group...',
     'this group is not found' => 'This group is not found',
+    'View Details' => 'View Details',
+    'Submission Details' => 'Submission Details',
+    'Submitted At' => 'Submitted At',
+    'Borrow' => 'Borrow',
+    'times' => 'times',
 ];

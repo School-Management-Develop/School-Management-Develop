@@ -46,7 +46,7 @@
                     </div>
 
                     {{-- Message --}}
-                    <div class="px-4 py-3" style="font-size:14px; line-height:1.6; color:#374151;"> 
+                    <div class="px-4 py-3" style="font-size:14px; line-height:1.6; color:#374151;">
 
                         {{ __('app.This student') }}
                         <span class="fw-bold text-dark">{{ $change['student_name'] }}</span>
@@ -249,7 +249,7 @@
                                         @elseif ($row->match_status === 'different_group')
                                             <form method="POST" action="{{ route('submissions.addStudent', $row->id) }}">
                                                 @csrf
-                                                <button class="btn btn-sm btn-warning w-100">
+                                                <button class="btn btn-sm btn-warning w-100">   
                                                     {{ __('app.Review Group Change') }}
                                                 </button>
                                             </form>
@@ -277,6 +277,12 @@
                                             <button
                                                 class="btn btn-sm btn-outline-danger w-100">{{ __('app.Remove') }}</button>
                                         </form>
+                                        <div>
+                                            <button class="btn btn-outline-primary w-100" data-bs-toggle="modal"
+                                                data-bs-target="#viewSubmissionModal{{ $row->id }}">
+                                                {{ __('app.View Details') }}
+                                            </button>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -294,4 +300,95 @@
             </div>
         </div>
     </div>
+    {{-- View Submission Detail Modals --}}
+    @foreach ($submissions as $row)
+        <div class="modal fade" id="viewSubmissionModal{{ $row->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content border-0 shadow rounded-4">
+
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold">{{ __('app.Submission Details') }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body pt-3">
+                        {{-- Student Info Card --}}
+                        <div class="p-3 rounded-4 bg-light border mb-3">
+                            <h5 class="fw-bold mb-1">{{ $row->student_name }}</h5>
+                            <span class="text-secondary small">{{ $row->group->group_name ?? '-' }}</span>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="text-secondary small">{{ __('app.Gender') }}</div>
+                                <div class="fw-semibold">{{ $row->gender ?: '-' }}</div>
+                            </div>
+
+                            <div class="col-6">
+                                <div class="text-secondary small">{{ __('app.Phone Number') }}</div>
+                                <div class="fw-semibold">{{ $row->phone_number ?: '-' }}</div>
+                            </div>
+
+                            <div class="col-6">
+                                <div class="text-secondary small">{{ __('app.item') }}</div>
+                                <div class="fw-semibold">
+                                    @if ($row->item && $row->item_id)
+                                        {{ $row->item->display_name }}
+                                    @else
+                                        {{ $row->other_item ?? '-' }}
+                                    @endif
+                                </div>
+                            </div>
+
+                            <div class="col-6">
+                                <div class="text-secondary small">{{ __('app.qty') }}</div>
+                                <div class="fw-semibold">{{ $row->qty }}</div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="text-secondary small">{{ __('app.notes') }}</div>
+                                <div class="fw-semibold">{{ $row->note ?: '-' }}</div>
+                            </div>
+
+                            <div class="col-6">
+                                <div class="text-secondary small">{{ __('app.Status') }}</div>
+                                <div>
+                                    @if ($row->is_borrow_approved)
+                                        <span class="badge bg-success">Approved</span>
+                                    @elseif ($row->match_status === 'different_group')
+                                        <span class="badge bg-warning text-dark">Group Change Needed</span>
+                                    @elseif ($row->match_status === 'same_group' || $row->student_id)
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    @else
+                                        <span class="badge bg-secondary">New Student</span>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <div class="col-6">
+                                <div class="text-secondary small">{{ __('app.Submitted At') }}</div>
+                                <div class="fw-semibold">
+                                    {{ $row->created_at ? $row->created_at->timezone('Asia/Phnom_Penh')->format('d M Y, H:i') : '-' }}
+                                </div>
+                            </div>
+
+                            @if ($row->item && !empty($row->item->image))
+                                <div class="col-12">
+                                    <div class="text-secondary small mb-1">{{ __('app.Image') }}</div>
+                                    <img src="{{ Storage::url($row->item->image) }}" class="rounded-3 border"
+                                        style="max-width:100%; max-height:200px; object-fit:cover;">
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-light"
+                            data-bs-dismiss="modal">{{ __('app.close') }}</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    @endforeach
 @endsection

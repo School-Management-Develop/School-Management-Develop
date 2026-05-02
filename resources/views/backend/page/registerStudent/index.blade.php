@@ -398,7 +398,7 @@
                     title: 'Done!',
                     text: "{{ session('success') }}",
                     confirmButtonColor: '#198754',
-                    timer: 4000
+                    timer: 20000
                 });
             @endif
 

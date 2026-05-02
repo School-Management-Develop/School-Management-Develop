@@ -54,7 +54,8 @@
         </form>
     </div>
 
-    @if(session('success'))
+    @include('backend.page.alerts.alert')
+    {{-- @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
@@ -66,7 +67,7 @@
                 @endforeach
             </ul>
         </div>
-    @endif
+    @endif --}}
 
     <div class="card border-0 shadow-sm rounded-4 mb-4 w-100">
         <div class="card-body">
